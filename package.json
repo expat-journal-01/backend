@@ -4,7 +4,7 @@
   "description": "unit 4",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "cross-env DB_ENV=testing jest --watchAll",
     "server": "nodemon index.js",
     "start": "node index.js"
   },
@@ -21,11 +21,15 @@
   "homepage": "https://github.com/expat-journal-01/backend#readme",
   "dependencies": {
     "cors": "^2.8.5",
+    "cross-env": "^7.0.2",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "helmet": "^3.23.3"
+    "helmet": "^3.23.3",
+    "knex": "^0.21.2"
   },
   "devDependencies": {
-    "nodemon": "^2.0.4"
+    "jest": "^26.1.0",
+    "nodemon": "^2.0.4",
+    "supertest": "^4.0.2"
   }
 }
