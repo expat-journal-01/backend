@@ -69,3 +69,91 @@ describe("Test register", () => {
     });
 
 });
+
+
+describe("Test login", () => {
+    beforeAll(async () => {
+        await db("user").truncate();
+
+        // Create 1 user
+        await request(server)
+            .post("/api/auth/register")
+            .send({
+                username: "Jamie",
+                password: "1234"
+            });
+    });
+    
+
+    afterAll(async () => {
+        await db("user").truncate();
+    });
+
+
+    test("Can't log in if username is wrong", async () => {
+        const response = await request(server)
+            .post("/api/auth/login")
+            .send({
+                username: "Jamieeeeeeee",
+                password: "1234"
+            });
+
+        expect(response.status).toBe(403);
+        expect(response.headers["content-type"]).toMatch(/application\/json/);
+        expect(response.body.token).toBe(undefined);
+    });
+
+    test("Can't log in if password is wrong", async () => {
+        const response = await request(server)
+            .post("/api/auth/login")
+            .send({
+                username: "Jamie",
+                password: "123456"
+            });
+
+        expect(response.status).toBe(403);
+        expect(response.headers["content-type"]).toMatch(/application\/json/);
+        expect(response.body.token).toBe(undefined);
+    });
+
+    
+    test("Can't log in using without credentials", async () => {
+        const response = await request(server)
+            .post("/api/auth/login")
+            .send({});
+
+        expect(response.status).toBe(400);
+        expect(response.headers["content-type"]).toMatch(/application\/json/);
+        expect(response.body.token).toBe(undefined);
+    });
+
+
+    test("Can't log in using with invalid credentials", async () => {
+        const response = await request(server)
+            .post("/api/auth/login")
+            .send({
+                username: "Ja", // less than 3 chars
+                password: ""    // less than 4 chars
+            });
+
+        expect(response.status).toBe(400);
+        expect(response.headers["content-type"]).toMatch(/application\/json/);
+        expect(response.body.token).toBe(undefined);
+    });
+
+
+    test("Can log in using valid credentials", async () => {
+        const response = await request(server)
+            .post("/api/auth/login")
+            .send({
+                username: "Jamie",
+                password: "1234"
+            });
+
+        expect(response.status).toBe(200);
+        expect(response.headers["content-type"]).toMatch(/application\/json/);
+        expect(response.body.token).toBeTruthy();
+    });
+    
+
+});
