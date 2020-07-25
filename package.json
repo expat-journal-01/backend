@@ -26,7 +26,9 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "helmet": "^3.23.3",
-    "knex": "^0.21.2"
+    "jsonwebtoken": "^8.5.1",
+    "knex": "^0.21.2",
+    "schema-inspector": "^1.7.0"
   },
   "devDependencies": {
     "jest": "^26.1.0",
