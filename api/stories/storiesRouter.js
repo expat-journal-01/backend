@@ -30,7 +30,24 @@ router.get("/", (req, res) => {
 // Add a story
 
 router.post("/", validateStoryData, (req, res) => {
-    res.status(501).send("Not implemented");
+    const storyData = {
+        title: req.body.title,
+        description: req.body.description || null,
+        coverImage: req.body.coverImage || null,
+        userId: req.jwt.id
+    };
+
+
+    storyDb.add(storyData)
+        .then(story => {
+            res.status(201).json(story);
+        })
+        .catch(error => {
+            res.status(500).json({
+                error: "Server error. Could not add a story.",
+                description: error
+            });
+        });
 });
 
 

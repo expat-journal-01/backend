@@ -4,16 +4,16 @@ const storySchema = {
     strict: true,
     properties: {
         title: {
-            type: 'string',
+            type: "string",
             minLength: 3,
             maxLength: 80
         },
         description: {
-            type: 'string',
+            type: "string",
             optional: true
         },
         coverImage: {
-            type: 'string',
+            type: "string",
             optional: true
         }
     }
