@@ -36,6 +36,15 @@ describe("Stories", () => {
         await cleanDb();
     });
 
+    
+    test("No stories yet", async () => {
+        const response = await request(server).get("/api/stories").set("Authorization", authToken);
+
+        expect(response.status).toBe(200);
+        expect(response.headers["content-type"]).toMatch(/application\/json/);
+        expect(response.body).toMatchObject([]);
+    });
+
 
     test("Add a story", async () => {
         const storyData = {
@@ -80,7 +89,7 @@ describe("Stories", () => {
 
         expect(response.status).toBe(200);
         expect(response.headers["content-type"]).toMatch(/application\/json/);
-        expect(response.body).toHaveLangth(1);
+        expect(response.body).toHaveLength(1);
     });
 
 
@@ -89,7 +98,7 @@ describe("Stories", () => {
 
         expect(response.status).toBe(200);
         expect(response.headers["content-type"]).toMatch(/application\/json/);
-        expect(response.body).toHaveLength(1);
+        expect(response.body).toMatchObject([]);
     });
 
 
@@ -98,7 +107,7 @@ describe("Stories", () => {
 
         expect(response.status).toBe(200);
         expect(response.headers["content-type"]).toMatch(/application\/json/);
-        expect(response.body).toMatch([]);
+        expect(response.body).toMatchObject([]);
     });
 
 

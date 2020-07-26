@@ -3,10 +3,12 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const userDb = require("./userModel");
-const { checkUsernameUnique } = require("./authMiddleware");
-
+const { checkUsernameUnique, validateUserData } = require("./authMiddleware");
 
 const router = express.Router();
+
+
+router.use(validateUserData);
 
 
 router.post("/register", checkUsernameUnique, (req, res) => {
