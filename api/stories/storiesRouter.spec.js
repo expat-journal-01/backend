@@ -57,17 +57,35 @@ describe("Stories", () => {
             .send(storyData)
             .set("Authorization", authToken);
 
-        console.log(response.body);
-
+        const expected = [
+            {
+                id: 1,
+                userId: 1,
+                title: "Sample post",
+                description: "Sample description"
+            }
+        ];
+        
+        expect(response.status).toBe(201);
+        expect(response.headers["content-type"]).toMatch(/application\/json/);
+        expect(response.body).toMatchObject(expected);
     });
 
     test("Edit a story", async () => {
-        const modifiedStoryData = {
+        modifiedStoryData = {
             title: "Changed title",
             description: "Changed description",
-            coverImage: "path/to/image.jpg",
-            userId: 1
-        };
+        }
+
+        const expected = [
+            {
+                id: 1,
+                title: "Changed title",
+                description: "Changed description",
+                coverImage: null,
+                userId: 1
+            }
+        ];
 
         const response = await request(server)
             .put("/api/stories/1")
@@ -76,7 +94,7 @@ describe("Stories", () => {
 
         expect(response.status).toBe(200);
         expect(response.headers["content-type"]).toMatch(/application\/json/);
-        expect(response.body).toEqual(modifiedStoryData);
+        expect(response.body).toEqual(expected);
     });
 
 

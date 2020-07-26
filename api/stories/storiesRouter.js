@@ -53,8 +53,35 @@ router.post("/", validateStoryData, (req, res) => {
 
 // Edit a story
 
-router.put("/:id", validateStoryData, (req, res) => {
-    res.status(501).send("Not implemented");
+router.put("/:id", validateStoryData, async (req, res) => {
+
+    const stories = await storyDb.getById(req.params.id)
+        .catch(error => {
+            res.status(500).json({
+                error: "Server error. Could not find a story.",
+                description: error
+            });
+        });
+
+    if (stories.length) {
+        const modifiedStory = Object.assign(stories[0], req.body);
+
+        storyDb.update(req.params.id, modifiedStory)
+            .then(stories => {
+                res.status(200).json(stories);
+            })
+            .catch(error => {
+                res.status(500).json({
+                    error: "Server error. Could not find a story.",
+                    description: error
+                });
+            });
+
+    } else {
+        res.status(404).json({
+            error: "Not found."
+        });
+    }
 });
 
 

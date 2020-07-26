@@ -6,7 +6,8 @@ const TABLE_NAME = "story";
 module.exports = {
     getById,
     getAll,
-    add
+    add,
+    update
 }
 
 
@@ -19,9 +20,19 @@ function getAll () {
 }
 
 function add (storyData) {
-    return db(TABLE_NAME).returning('id')
+    return db(TABLE_NAME)
+        .returning("id")
         .insert(storyData)
         .then(ids => {
             return getById(ids[0]);
+        });
+}
+
+function update (id, storyData) {
+    return db(TABLE_NAME)
+        .where({id})
+        .update(storyData)
+        .then(rows => {
+            return getById(id);
         });
 }
