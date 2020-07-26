@@ -88,7 +88,34 @@ router.put("/:id", validateStoryData, async (req, res) => {
 // Delete a story and its posts
 
 router.delete("/:id", (req, res) => {
-    res.status(501).send("Not implemented");
+    let deletedStories;
+
+    storyDb.getById(req.params.id)
+        .then(stories => {
+            if (stories.length) {
+                deletedStories = stories;
+                return storyDb.remove(req.params.id);
+            } else {
+                res.status(404).json({
+                    error: "Could not delete a story. Not found."
+                });
+            }
+        })
+        .then(rowsDeleted => {
+            if (rowsDeleted) {
+                res.status(200).json(deletedStories);
+            } else {
+                res.status(404).json({
+                    error: `Not found. Could not delete a story with id ${req.params.id}`
+                });
+            }
+        })
+        .catch(error => {
+            res.status(500).json({
+                error: "Server error. Could not delete a story.",
+                description: error
+            });
+        });
 });
 
 

@@ -99,7 +99,9 @@ describe("Stories", () => {
 
 
     test("Get all stories", async () => {
-        const response = await request(server).get("/api/stories").set("Authorization", authToken);
+        const response = await request(server)
+            .get("/api/stories")
+            .set("Authorization", authToken);
 
         expect(response.status).toBe(200);
         expect(response.headers["content-type"]).toMatch(/application\/json/);
@@ -108,16 +110,22 @@ describe("Stories", () => {
 
 
     test("Delete a story", async () => {
-        const response = await request(server).del("/api/stories/1").set("Authorization", authToken);
+
+
+        const response = await request(server)
+            .del("/api/stories/1")
+            .set("Authorization", authToken);
 
         expect(response.status).toBe(200);
         expect(response.headers["content-type"]).toMatch(/application\/json/);
-        expect(response.body).toMatchObject([]);
+        expect(response.body).toHaveLength(1);
     });
 
 
     test("No stories left", async () => {
-        const response = await request(server).get("/api/stories").set("Authorization", authToken);
+        const response = await request(server)
+            .get("/api/stories")
+            .set("Authorization", authToken);
 
         expect(response.status).toBe(200);
         expect(response.headers["content-type"]).toMatch(/application\/json/);

@@ -7,7 +7,8 @@ module.exports = {
     getById,
     getAll,
     add,
-    update
+    update,
+    remove
 }
 
 
@@ -35,4 +36,10 @@ function update (id, storyData) {
         .then(rows => {
             return getById(id);
         });
+}
+
+function remove (id) {
+    return db(TABLE_NAME)
+        .where({id})
+        .del();
 }
