@@ -94,19 +94,21 @@ router.delete("/:id", (req, res) => {
         .then(stories => {
             if (stories.length) {
                 deletedStories = stories;
-                return storyDb.remove(req.params.id);
+
+                storyDb.remove(req.params.id)
+                    .then(rowsDeleted => {
+                        if (rowsDeleted) {
+                            res.status(200).json(deletedStories);
+                        } else {
+                            res.status(404).json({
+                                error: `Not found. Could not delete a story with id ${req.params.id}`
+                            });
+                        }
+                    });
+
             } else {
                 res.status(404).json({
                     error: "Could not delete a story. Not found."
-                });
-            }
-        })
-        .then(rowsDeleted => {
-            if (rowsDeleted) {
-                res.status(200).json(deletedStories);
-            } else {
-                res.status(404).json({
-                    error: `Not found. Could not delete a story with id ${req.params.id}`
                 });
             }
         })

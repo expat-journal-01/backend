@@ -36,13 +36,44 @@ describe("Stories", () => {
         await cleanDb();
     });
 
+
+    test("Can't read stories when not authorized", async () => {
+        const response = await request(server).get("/api/stories");
+
+        expect(response.status).toBe(401);
+        expect(response.headers["content-type"]).toMatch(/application\/json/);
+    });
+
+
+    test("Can't read stories when auth header is invalid", async () => {
+        const response = await request(server).get("/api/stories").set("Authorization", "wrong token");
+
+        expect(response.status).toBe(403); // forbidden
+        expect(response.headers["content-type"]).toMatch(/application\/json/);
+    });
     
+
     test("No stories yet", async () => {
         const response = await request(server).get("/api/stories").set("Authorization", authToken);
 
         expect(response.status).toBe(200);
         expect(response.headers["content-type"]).toMatch(/application\/json/);
         expect(response.body).toMatchObject([]);
+    });
+
+
+    test("Can't add a story without title", async () => {
+        const storyData = {
+            description: "Sample description"
+        };
+
+        const response = await request(server)
+            .post("/api/stories")
+            .send(storyData)
+            .set("Authorization", authToken);
+        
+        expect(response.status).toBe(400);
+        expect(response.headers["content-type"]).toMatch(/application\/json/);
     });
 
 
@@ -70,6 +101,7 @@ describe("Stories", () => {
         expect(response.headers["content-type"]).toMatch(/application\/json/);
         expect(response.body).toMatchObject(expected);
     });
+
 
     test("Edit a story", async () => {
         modifiedStoryData = {
@@ -106,6 +138,17 @@ describe("Stories", () => {
         expect(response.status).toBe(200);
         expect(response.headers["content-type"]).toMatch(/application\/json/);
         expect(response.body).toHaveLength(1);
+    });
+
+    
+    test("Can't delete a story that doesn't exist", async () => {
+        const response = await request(server)
+            .del("/api/stories/92341234")
+            .set("Authorization", authToken);
+
+        expect(response.status).toBe(404);
+        expect(response.headers["content-type"]).toMatch(/application\/json/);
+        expect(response.body.error).toBeTruthy();
     });
 
 
