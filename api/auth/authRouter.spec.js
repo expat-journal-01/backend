@@ -1,16 +1,18 @@
 const request = require("supertest");
+
 const db = require("../../data/dbConfig");
 const server = require("../../server");
+const { cleanDb } = require("../../data/helpers");
 
 
 describe("Test register", () => {
     beforeAll(async () => {
-        await db("user").truncate();
+        await cleanDb();
     });
     
 
     afterAll(async () => {
-        await db("user").truncate();
+        await cleanDb();
     });
 
 
@@ -73,7 +75,7 @@ describe("Test register", () => {
 
 describe("Test login", () => {
     beforeAll(async () => {
-        await db("user").truncate();
+        await cleanDb();
 
         // Create 1 user
         await request(server)
@@ -86,7 +88,7 @@ describe("Test login", () => {
     
 
     afterAll(async () => {
-        await db("user").truncate();
+        await cleanDb();
     });
 
 

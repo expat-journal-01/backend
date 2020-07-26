@@ -4,6 +4,13 @@ const express = require("express");
 const router = express.Router();
 
 
+// Add a story
+
+router.post("/", (req, res) => {
+    res.status(501).send("Not implemented");
+});
+
+
 // Get all stories (no posts inside)
 
 router.get("/", (req, res) => {
