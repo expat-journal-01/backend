@@ -55,4 +55,13 @@ describe("Test users", () => {
         expect(response.body).toHaveLength(1);
     });
 
+
+    test("Doesn't reveal password", async () => {
+        const response = await request(server)
+            .get("/api/users")
+            .set("Authorization", authToken);
+
+        expect(response.body[0]["password"]).toBeFalsy();
+    });
+
 });

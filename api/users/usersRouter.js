@@ -1,5 +1,6 @@
 const express = require("express");
 
+const userDb = require("./userModel");
 const { authenticate } = require("../auth/authMiddleware");
 
 
@@ -12,7 +13,16 @@ router.use(authenticate);
 // Get all users
 
 router.get("/", (req, res) => {
-    res.status(501).send("Not implemented");
+    userDb.getAll()
+        .then(users => {
+            res.status(200).json(users);
+        })
+        .catch(error => {
+            res.status(500).json({
+                error: "Server error. Could not get users.",
+                description: error
+            });
+        });
 });
 
 

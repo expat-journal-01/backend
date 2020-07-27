@@ -5,10 +5,16 @@ const TABLE_NAME = "user";
 
 
 module.exports = {
+    getAll,
     getById,
     register,
     getByUsername
 };
+
+
+function getAll () {
+    return db(TABLE_NAME).select("id", "username");
+}
 
 
 function getById (id) {
