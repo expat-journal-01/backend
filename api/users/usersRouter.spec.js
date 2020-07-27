@@ -64,4 +64,15 @@ describe("Test users", () => {
         expect(response.body[0]["password"]).toBeFalsy();
     });
 
+    
+    test("Get a user by id", async () => {
+        const response = await request(server)
+            .get("/api/users/1")
+            .set("Authorization", authToken);
+
+        expect(response.status).toBe(200);
+        expect(response.headers["content-type"]).toMatch(/application\/json/);
+        expect(response.body).toHaveLength(1);
+    });
+
 });

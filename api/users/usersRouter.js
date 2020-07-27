@@ -26,4 +26,20 @@ router.get("/", (req, res) => {
 });
 
 
+// Get a user by id
+
+router.get("/:id", (req, res) => {
+    userDb.getById(req.params.id)
+        .then(users => {
+            res.status(200).json(users);
+        })
+        .catch(error => {
+            res.status(500).json({
+                error: "Server error. Could not get users.",
+                description: error
+            });
+        });
+});
+
+
 module.exports = router;
