@@ -8,7 +8,8 @@ module.exports = {
     getAll,
     add,
     update,
-    remove
+    remove,
+    getByUserId
 }
 
 
@@ -16,9 +17,25 @@ function getById (id) {
     return db(TABLE_NAME).where({id});
 }
 
+
+function getByUserId (userId) {
+    return db("story")
+        .join("user", "user.id", "=", "story.userId")
+        .where({userId})
+        .select(
+            "story.id",
+            "story.title",
+            "story.description",
+            "story.coverImage",
+            "story.userId"
+        );
+}
+
+
 function getAll () {
     return db(TABLE_NAME);
 }
+
 
 function add (storyData) {
     return db(TABLE_NAME)
@@ -29,6 +46,7 @@ function add (storyData) {
         });
 }
 
+
 function update (id, storyData) {
     return db(TABLE_NAME)
         .where({id})
@@ -37,6 +55,7 @@ function update (id, storyData) {
             return getById(id);
         });
 }
+
 
 function remove (id) {
     return db(TABLE_NAME)
