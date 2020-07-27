@@ -1,6 +1,8 @@
+const path = require("path");
+const fs = require("fs");
 const express = require("express");
 const multer = require("multer");
-const path = require("path");
+
 
 const { authenticate } = require("../auth/authMiddleware");
 const storyDb = require("../stories/storyModel");
@@ -12,15 +14,14 @@ const { isPostDataValid } = require("./postsHelpers");
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, process.env.UPLOAD_PATH)
+        cb(null, process.env.UPLOAD_TEMP_PATH)
     },
     
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
 
         cb(null, uniqueSuffix + path.extname(file.originalname));
-    },
-    fileSize: 5 * 1024 * 1024 // max 5 MB
+    }
 });
 
 const upload = multer(
@@ -33,6 +34,9 @@ const upload = multer(
                 return cb(null, false);
             }
             cb(null, true);
+        },
+        limits: {
+            fileSize: 4 * 1024 * 1024 // max 5 MB
         }
     }
 );
@@ -97,16 +101,29 @@ router.post("/", upload.single("image"), async (req, res) => {
             });
         });
 
+
     // If story exists
 
     if (stories.length) {
         const postData = {
             title: req.body.title,
             description: req.body.description || null,
-            image: req.file.path,
+            image: path.join(process.env.UPLOAD_PATH, req.file.filename),
             storyId: req.body.storyId,
             userId: req.jwt.id
         };
+
+
+        // Move the file from tmp to uploads
+
+        fs.rename(
+            path.join(process.env.UPLOAD_TEMP_PATH, req.file.filename),
+            path.join(process.env.UPLOAD_PATH, req.file.filename),
+            (err) => {
+                if (err) throw err;
+                console.log('Rename complete!');
+            }
+        );
 
         postDb.add(postData)
             .then(posts => {
