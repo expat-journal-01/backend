@@ -42,6 +42,23 @@ router.get("/user/:id", (req, res) => {
         });
 });
 
+
+// Get a story by id
+
+router.get("/:id", (req, res) => {
+    storyDb.getById(req.params.id)
+        .then(stories => {
+            res.status(200).json(stories);
+        })
+        .catch(error => {
+            res.status(500).json({
+                error: "Server error. Could not get a story.",
+                description: error
+            });
+        });
+});
+
+
 // Add a story
 
 router.post("/", validateStoryData, (req, res) => {

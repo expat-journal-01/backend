@@ -103,6 +103,17 @@ describe("Stories", () => {
     });
 
 
+    test("Get a story by id", async () => {
+        const response = await request(server)
+            .get("/api/stories/1")
+            .set("Authorization", authToken);
+        
+        expect(response.status).toBe(200);
+        expect(response.headers["content-type"]).toMatch(/application\/json/);
+        expect(response.body).toHaveLength(1);
+    });
+
+
     test("Edit a story", async () => {
         modifiedStoryData = {
             title: "Changed title",
@@ -249,7 +260,7 @@ describe("Stories", () => {
         expect(response.body).toHaveLength(1);
     });
 
-    
+
     test("Can't edit a story created by another user", async () => {
         modifiedStoryData = {
             title: "Changed title",
