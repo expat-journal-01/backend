@@ -30,6 +30,7 @@ router.get("/", (req, res) => {
 // Add a story
 
 router.post("/", validateStoryData, (req, res) => {
+
     const storyData = {
         title: req.body.title,
         description: req.body.description || null,

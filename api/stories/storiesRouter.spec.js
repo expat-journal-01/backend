@@ -175,4 +175,95 @@ describe("Stories", () => {
         expect(response.body).toMatchObject([]);
     });
 
+    test("Create another user and log in", async () => {
+
+        // Create a user
+        await request(server)
+            .post("/api/auth/register")
+            .send({
+                username: "Peter",
+                password: "1234"
+            });
+
+        // Login
+        const loginResponse = await request(server)
+            .post("/api/auth/login")
+            .send({
+                username: "Peter",
+                password: "1234"
+            });
+        
+        // Save the token
+        authToken = loginResponse.body.token;
+    });
+
+
+    test("Add a story by the second user", async () => {
+        const storyData = {
+            title: "Sample post",
+            description: "Sample description"
+        };
+
+        const response = await request(server)
+            .post("/api/stories")
+            .send(storyData)
+            .set("Authorization", authToken);
+
+        const expected = [
+            {
+                id: 2,
+                userId: 2,
+                title: "Sample post",
+                description: "Sample description"
+            }
+        ];
+        
+        expect(response.status).toBe(201);
+        expect(response.headers["content-type"]).toMatch(/application\/json/);
+        expect(response.body).toMatchObject(expected);
+    });
+
+
+    test("Log in again as the first user", async () => {
+        const loginResponse = await request(server)
+            .post("/api/auth/login")
+            .send({
+                username: "Mark",
+                password: "1234"
+            });
+        
+        // Save the token
+        authToken = loginResponse.body.token;
+        expect(authToken).toBeTruthy();
+    });
+
+
+    test("Can't edit a story created by another user", async () => {
+        modifiedStoryData = {
+            title: "Changed title",
+            description: "Changed description",
+        }
+
+        const response = await request(server)
+            .put("/api/stories/2")
+            .set("Authorization", authToken)
+            .send(modifiedStoryData);
+
+        expect(response.status).toBe(403);
+        expect(response.headers["content-type"]).toMatch(/application\/json/);
+        expect(response.body.error).toBeTruthy();
+    });
+
+    test("Can't delete a story created by another user", async () => {
+
+
+        const response = await request(server)
+            .del("/api/stories/2")
+            .set("Authorization", authToken);
+
+        expect(response.status).toBe(403);
+        expect(response.headers["content-type"]).toMatch(/application\/json/);
+        expect(response.body.error).toBeTruthy();
+    });
+
 });
