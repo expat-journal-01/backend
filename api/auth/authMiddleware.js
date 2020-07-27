@@ -1,8 +1,8 @@
 const jwt = require("jsonwebtoken");
 
 const inspector = require("schema-inspector");
-const userSchema = require("./userSchema");
-const userDb = require("./userModel");
+const userSchema = require("../users/userSchema");
+const userDb = require("../users/userModel");
 
 
 module.exports = {
