@@ -56,6 +56,8 @@ router.post("/", validateStoryData, (req, res) => {
 
 router.put("/:id", validateStoryData, async (req, res) => {
 
+    // Find the story
+    
     const stories = await storyDb.getById(req.params.id)
         .catch(error => {
             res.status(500).json({
@@ -64,20 +66,32 @@ router.put("/:id", validateStoryData, async (req, res) => {
             });
         });
 
-    if (stories.length) {
-        const modifiedStory = Object.assign(stories[0], req.body);
 
-        storyDb.update(req.params.id, modifiedStory)
-            .then(stories => {
-                res.status(200).json(stories);
-            })
-            .catch(error => {
-                res.status(500).json({
-                    error: "Server error. Could not find a story.",
-                    description: error
-                });
+
+
+    if (stories.length) {
+        // If the story has been created by another user, can't edit
+        if (stories[0]["userId"] !== req.jwt.id) {
+
+            res.status(403).json({
+                error: "Access denied"
             });
 
+        } else {
+
+            const modifiedStory = Object.assign(stories[0], req.body);
+
+            storyDb.update(req.params.id, modifiedStory)
+                .then(stories => {
+                    res.status(200).json(stories);
+                })
+                .catch(error => {
+                    res.status(500).json({
+                        error: "Server error. Could not find a story.",
+                        description: error
+                    });
+                });
+        }
     } else {
         res.status(404).json({
             error: "Not found."
@@ -94,19 +108,26 @@ router.delete("/:id", (req, res) => {
     storyDb.getById(req.params.id)
         .then(stories => {
             if (stories.length) {
-                deletedStories = stories;
-
-                storyDb.remove(req.params.id)
-                    .then(rowsDeleted => {
-                        if (rowsDeleted) {
-                            res.status(200).json(deletedStories);
-                        } else {
-                            res.status(404).json({
-                                error: `Not found. Could not delete a story with id ${req.params.id}`
-                            });
-                        }
+                if (stories[0]["userId"] !== req.jwt.id) {
+            
+                    res.status(403).json({
+                        error: "Access denied"
                     });
+        
+                } else {
+                    deletedStories = stories;
 
+                    storyDb.remove(req.params.id)
+                        .then(rowsDeleted => {
+                            if (rowsDeleted) {
+                                res.status(200).json(deletedStories);
+                            } else {
+                                res.status(404).json({
+                                    error: `Not found. Could not delete a story with id ${req.params.id}`
+                                });
+                            }
+                        });
+                }
             } else {
                 res.status(404).json({
                     error: "Could not delete a story. Not found."
