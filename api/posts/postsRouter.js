@@ -1,8 +1,41 @@
 const express = require("express");
+const multer = require("multer");
+const path = require("path");
 
-const postDb = require("./postModel");
 const { authenticate } = require("../auth/authMiddleware");
-const { validatePostData } = require("./postsMiddleware");
+const storyDb = require("../stories/storyModel");
+const postDb = require("./postModel");
+const { isPostDataValid } = require("./postsHelpers");
+
+
+// Multer config
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, process.env.UPLOAD_PATH)
+    },
+    
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+
+        cb(null, uniqueSuffix + path.extname(file.originalname));
+    },
+    fileSize: 5 * 1024 * 1024 // max 5 MB
+});
+
+const upload = multer(
+    {
+        storage: storage,
+        fileFilter: (req, file, cb) => {
+            const ext = path.extname(file.originalname);
+            if(ext !== ".png" && ext !== ".jpg" && ext !== ".jpeg") {
+                req.invalidExtension = true;
+                return cb(null, false);
+            }
+            cb(null, true);
+        }
+    }
+);
 
 
 const router = express.Router();
@@ -44,14 +77,52 @@ router.get("/:id", (req, res) => {
 
 // Add a post
 
-router.post("/", validatePostData, (req, res) => {
-    res.status(501).send("Not implemented");
+router.post("/", upload.single("image"), async (req, res) => {
+    if (!req.file || req.invalidExtension || !isPostDataValid(req.body)) {
+        res.status(400).json({
+            error: "Bad request. Please provide valid data"
+        });
+    }
+
+    const stories = await storyDb.getById(req.body.storyId)
+        .catch(error => {
+            res.status(500).json({
+                error: "Server error. Could not get a story.",
+                description: error
+            });
+        });
+
+    if (stories.length) {
+        const postData = {
+            title: req.body.title,
+            description: req.body.description || null,
+            image: req.file.path,
+            storyId: req.body.storyId,
+            userId: req.jwt.id
+        };
+
+        postDb.add(postData)
+            .then(posts => {
+                res.status(200).json(posts);
+            })
+            .catch(error => {
+                res.status(500).json({
+                    error: "Server error. Could not add a post.",
+                    description: error
+                });
+            });
+    } else {
+        res.status(404).json({
+            error: `Not found. Could not find a story with id ${req.body.storyId}.`
+        });
+    }
+    
 });
 
 
 // Edit a post
 
-router.put("/:id", validatePostData, (req, res) => {
+router.put("/:id", (req, res) => {
     res.status(501).send("Not implemented");
 });
 
