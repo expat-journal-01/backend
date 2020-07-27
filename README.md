@@ -9,6 +9,8 @@ Login | POST | /api/auth/login | 200 OK
 Get all users | GET | /api/users | 200 OK
 Get a user by id | GET | /api/users/:id | 200 OK
 Get all stories | GET | /api/stories | 200 OK
+Get a story by id | GET | /api/stories/:id | 200 OK
+Get a story by userId | GET | /api/stories/user/:id | 200 OK
 Add a story | POST | /api/stories | 201 Created
 Edit a story | PUT | /api/stories/:id | 200 OK
 Delete a story | DELETE | /api/stories/:id | 200 OK | Deletes a story __and all its posts__
