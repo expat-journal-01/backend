@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -20,6 +21,7 @@ server.use("/api/auth", authRouter);
 server.use("/api/posts", postsRouter);
 server.use("/api/stories", storiesRouter);
 server.use("/api/users", usersRouter);
+server.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 module.exports = server;
