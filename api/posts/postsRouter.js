@@ -139,6 +139,14 @@ router.post("/", upload.single("image"), async (req, res) => {
     // If story exists
 
     if (stories.length) {
+
+        if (stories[0]["userId"] !== req.jwt.id) {
+
+            return res.status(403).json({
+                error: "Access denied. Can't add a post to a story of another user."
+            });
+        }
+        
         const postData = {
             title: req.body.title,
             description: req.body.description || null,
@@ -209,6 +217,14 @@ router.delete("/:id", async (req, res) => {
 
 
     if (posts.length) {
+
+        if (posts[0]["userId"] !== req.jwt.id) {
+            
+            return res.status(403).json({
+                error: "Access denied. Can't delete a post of another user."
+            });
+        }
+
         const deletedPost = posts[0];
 
         // Delete the post
