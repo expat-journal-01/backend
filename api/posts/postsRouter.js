@@ -68,14 +68,48 @@ router.get("/", (req, res) => {
 // Get all posts by user id
 
 router.get("/user/:id", (req, res) => {
-    res.status(501).send("Not implemented");
+    postDb.getByUserId(req.params.id)
+        .then(posts => {
+            res.status(200).json(posts);
+        })
+        .catch(error => {
+            res.status(500).json({
+                error: "Server error. Could not get all posts.",
+                description: error
+            });
+        });
+});
+
+
+// Get all posts by storyId
+
+router.get("/story/:id", (req, res) => {
+    postDb.getByStoryId(req.params.id)
+        .then(posts => {
+            res.status(200).json(posts);
+        })
+        .catch(error => {
+            res.status(500).json({
+                error: "Server error. Could not get all posts.",
+                description: error
+            });
+        });
 });
 
 
 // Get a post by id
 
 router.get("/:id", (req, res) => {
-    res.status(501).send("Not implemented");
+    postDb.getById(req.params.id)
+        .then(posts => {
+            res.status(200).json(posts);
+        })
+        .catch(error => {
+            res.status(500).json({
+                error: "Server error. Could not get all posts.",
+                description: error
+            });
+        });
 });
 
 
