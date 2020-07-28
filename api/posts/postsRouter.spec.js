@@ -186,7 +186,7 @@ describe("Stories", () => {
 
         expect(response.status).toBe(200);
         expect(response.headers["content-type"]).toMatch(/application\/json/);
-        expect(response.body).toHaveLength(1);
+        expect(response.body.title).toBeTruthy();
     });
 
 

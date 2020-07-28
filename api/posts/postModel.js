@@ -8,7 +8,8 @@ module.exports = {
     getAll,
     add,
     getByUserId,
-    getByStoryId
+    getByStoryId,
+    remove
 };
 
 
@@ -59,4 +60,11 @@ function add (postData) {
         .then(ids => {
             return getById(ids[0]);
         });
+}
+
+
+function remove (id) {
+    return db(TABLE_NAME)
+        .where({id})
+        .del();
 }

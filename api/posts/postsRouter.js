@@ -7,7 +7,7 @@ const multer = require("multer");
 const { authenticate } = require("../auth/authMiddleware");
 const storyDb = require("../stories/storyModel");
 const postDb = require("./postModel");
-const { isPostDataValid } = require("./postsHelpers");
+const { isPostDataValid, removeImage } = require("./postsHelpers");
 
 
 // Multer config
@@ -197,8 +197,61 @@ router.put("/:id", (req, res) => {
 
 // Delete a post
 
-router.delete("/:id", (req, res) => {
-    res.status(501).send("Not implemented");
+router.delete("/:id", async (req, res) => {
+
+    const posts = await postDb.getById(req.params.id)
+        .catch(error => {
+            return res.status(500).json({
+                error: "Server error. Could not get a story.",
+                description: error
+            });
+        });
+
+
+    if (posts.length) {
+        const deletedPost = posts[0];
+
+        // Delete the post
+        await postDb.remove(req.params.id)
+            .catch(error => {
+                return res.status(500).json({
+                    error: "Server error. Could not remove a post.",
+                    description: error
+                });
+            });
+
+        // Get the rest of the posts in that story
+        const allStoryPosts = await postDb.getByStoryId(deletedPost.storyId)
+            .catch(error => {
+                return res.status(500).json({
+                    error: "Server error. Could not get a story.",
+                    description: error
+                });
+            });
+
+        if (allStoryPosts.length) {
+
+            // Set story's coverImage to the image of the latest post
+            const lastPost = allStoryPosts[allStoryPosts.length - 1];
+            storyDb.update(deletedPost.storyId, { coverImage: lastPost.image });
+
+        } else {
+            // That wa the last post! So set coverImage to null
+            storyDb.update(deletedPost.storyId, { coverImage: null });
+        }
+
+        removeImage(deletedPost.image);
+
+        // Respond with the deleted post
+
+        return res.status(200).json(deletedPost);
+
+    } else {
+        return res.status(404).json({
+            error: `Not found. Post with id ${req.params.id} doesn't exist.`
+        });
+    }
+    
 });
 
 
