@@ -172,7 +172,7 @@ router.post("/", upload.single("image"), async (req, res) => {
 
         // Update image url in story
 
-        storyDb.update(req.body.storyId, { coverImage: req.file.path })
+        storyDb.update(req.body.storyId, { coverImage: path.join(process.env.UPLOAD_PATH, req.file.filename) })
             .catch(error => {
                 return res.status(500).json({
                     error: "Server error. Could not update story image.",
