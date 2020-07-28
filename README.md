@@ -19,7 +19,7 @@ Get a post by its id | GET | /api/posts/:id | 200 OK
 Get all posts by userId | GET | /api/posts/user/:id | 200 OK
 Get all posts by storyId | GET | /api/posts/story/:id | 200 OK
 Add a post | POST | /api/posts | 201 Created | Also automatically updates __coverImage__ of a story it belongs to.
-Get an uploaded image | GET | /uploads/image.jpg | 200 OK | For example: https://<backend url>/uploads/image.jpg
+Get an uploaded image | GET | /uploads/image.jpg | 200 OK
 
 
 
