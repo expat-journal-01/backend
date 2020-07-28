@@ -29,6 +29,19 @@ describe("Stories", () => {
         
         // Save the token
         authToken = loginResponse.body.token;
+
+
+        // Add a story
+
+        const storyData = {
+            title: "Sample post",
+            description: "Sample description"
+        };
+
+        await request(server)
+            .post("/api/stories")
+            .send(storyData)
+            .set("Authorization", authToken);
         
     });
 
@@ -58,14 +71,34 @@ describe("Stories", () => {
     });
 
 
-    test("Can't edit a post with no data", async () => {
-        const response = await request(server)
-            .put("/api/posts/1")
-            .set("Authorization", authToken);
+    test("Add a post successfully", async (done) => {
+        request(server)
+            .post("/api/posts")
+            .field("title", "Sample title")
+            .field("description", "Sample description")
+            .field("storyId", 1)
+            .attach("image", "api/posts/test_images/small.jpg")
+            .set("Authorization", authToken)
+            .then((response) => {
+                const expected = [
+                    {
+                        id: 1,
+                        title: 'Sample title',
+                        description: 'Sample description',
+                        image: 'uploads/1595896000124-187187945.jpg',
+                        userId: 1,
+                        storyId: 1
+                    }
+                ];
 
-        expect(response.status).toBe(400);
-        expect(response.headers["content-type"]).toMatch(/application\/json/);
-        expect(response.body.error).toBeTruthy();
+                expect(response.status).toBe(201);
+                expect(response.headers["content-type"]).toMatch(/application\/json/);
+                expect(response.body[0]["image"]).toBeTruthy();
+
+                done();
+            });
+
+        
     });
 
 });

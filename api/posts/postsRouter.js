@@ -86,7 +86,7 @@ router.post("/", upload.single("image"), async (req, res) => {
     // Check incoming data
 
     if (!req.file || req.invalidExtension || !isPostDataValid(req.body)) {
-        res.status(400).json({
+        return res.status(400).json({
             error: "Bad request. Please provide valid data"
         });
     }
@@ -95,7 +95,7 @@ router.post("/", upload.single("image"), async (req, res) => {
 
     const stories = await storyDb.getById(req.body.storyId)
         .catch(error => {
-            res.status(500).json({
+            return res.status(500).json({
                 error: "Server error. Could not get a story.",
                 description: error
             });
@@ -121,16 +121,15 @@ router.post("/", upload.single("image"), async (req, res) => {
             path.join(process.env.UPLOAD_PATH, req.file.filename),
             (err) => {
                 if (err) throw err;
-                console.log('Rename complete!');
             }
         );
 
         postDb.add(postData)
             .then(posts => {
-                res.status(200).json(posts);
+                return res.status(201).json(posts);
             })
             .catch(error => {
-                res.status(500).json({
+                return res.status(500).json({
                     error: "Server error. Could not add a post.",
                     description: error
                 });
@@ -141,13 +140,13 @@ router.post("/", upload.single("image"), async (req, res) => {
 
         storyDb.update(req.body.storyId, { coverImage: req.file.path })
             .catch(error => {
-                res.status(500).json({
+                return res.status(500).json({
                     error: "Server error. Could not update story image.",
                     description: error
                 });
             });
     } else {
-        res.status(404).json({
+        return res.status(404).json({
             error: `Not found. Could not find a story with id ${req.body.storyId}.`
         });
     }
