@@ -9,7 +9,8 @@ module.exports = {
     add,
     getByUserId,
     getByStoryId,
-    remove
+    remove,
+    update
 };
 
 
@@ -67,4 +68,14 @@ function remove (id) {
     return db(TABLE_NAME)
         .where({id})
         .del();
+}
+
+
+function update (id, postData) {
+    return db(TABLE_NAME)
+        .where({id})
+        .update(postData)
+        .then(rows => {
+            return getById(id);
+        });
 }

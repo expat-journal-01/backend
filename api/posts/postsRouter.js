@@ -7,6 +7,7 @@ const multer = require("multer");
 const { authenticate } = require("../auth/authMiddleware");
 const storyDb = require("../stories/storyModel");
 const postDb = require("./postModel");
+const { validatePostData } = require("./postsMiddleware");
 const { isPostDataValid, removeImage } = require("./postsHelpers");
 
 
@@ -198,8 +199,45 @@ router.post("/", upload.single("image"), async (req, res) => {
 
 // Edit a post
 
-router.put("/:id", (req, res) => {
-    res.status(501).send("Not implemented");
+router.put("/:id", validatePostData, async (req, res) => {
+    const posts = await postDb.getById(req.params.id)
+        .catch(error => {
+            return res.status(500).json({
+                error: "Server error. Could not get a post.",
+                description: error
+            });
+        });
+    
+    if (posts.length) {
+        const currentPostData = posts[0];
+
+        if (currentPostData.userId !== req.jwt.id) {
+            return res.status(403).json({
+                error: "Access denied. Can't edit a post of another user."
+            });
+        }
+
+    const changedPostData = Object.assign(currentPostData, req.body);
+
+    
+    postDb.update(req.params.id, changedPostData)
+        .then(posts => {
+            res.status(200).json(posts);
+        })
+        .catch(error => {
+            return res.status(500).json({
+                error: "Server error. Could not update a post.",
+                description: error
+            });
+        });
+
+
+    } else {
+        return res.status(404).json({
+            error: `Not found. Post with id ${req.params.id} doesn't exist.`
+        });
+    }
+        
 });
 
 
