@@ -7,7 +7,8 @@ const multer = require("multer");
 const { authenticate } = require("../auth/authMiddleware");
 const storyDb = require("../stories/storyModel");
 const postDb = require("./postModel");
-const { isPostDataValid } = require("./postsHelpers");
+const { validatePostData } = require("./postsMiddleware");
+const { isPostDataValid, removeImage } = require("./postsHelpers");
 
 
 // Multer config
@@ -139,6 +140,14 @@ router.post("/", upload.single("image"), async (req, res) => {
     // If story exists
 
     if (stories.length) {
+
+        if (stories[0]["userId"] !== req.jwt.id) {
+
+            return res.status(403).json({
+                error: "Access denied. Can't add a post to a story of another user."
+            });
+        }
+        
         const postData = {
             title: req.body.title,
             description: req.body.description || null,
@@ -172,7 +181,7 @@ router.post("/", upload.single("image"), async (req, res) => {
 
         // Update image url in story
 
-        storyDb.update(req.body.storyId, { coverImage: req.file.path })
+        storyDb.update(req.body.storyId, { coverImage: path.join(process.env.UPLOAD_PATH, req.file.filename) })
             .catch(error => {
                 return res.status(500).json({
                     error: "Server error. Could not update story image.",
@@ -190,15 +199,113 @@ router.post("/", upload.single("image"), async (req, res) => {
 
 // Edit a post
 
-router.put("/:id", (req, res) => {
-    res.status(501).send("Not implemented");
+router.put("/:id", validatePostData, async (req, res) => {
+    const posts = await postDb.getById(req.params.id)
+        .catch(error => {
+            return res.status(500).json({
+                error: "Server error. Could not get a post.",
+                description: error
+            });
+        });
+    
+    if (posts.length) {
+        const currentPostData = posts[0];
+
+        if (currentPostData.userId !== req.jwt.id) {
+            return res.status(403).json({
+                error: "Access denied. Can't edit a post of another user."
+            });
+        }
+
+    const changedPostData = Object.assign(currentPostData, req.body);
+
+    
+    postDb.update(req.params.id, changedPostData)
+        .then(posts => {
+            res.status(200).json(posts);
+        })
+        .catch(error => {
+            return res.status(500).json({
+                error: "Server error. Could not update a post.",
+                description: error
+            });
+        });
+
+
+    } else {
+        return res.status(404).json({
+            error: `Not found. Post with id ${req.params.id} doesn't exist.`
+        });
+    }
+        
 });
 
 
 // Delete a post
 
-router.delete("/:id", (req, res) => {
-    res.status(501).send("Not implemented");
+router.delete("/:id", async (req, res) => {
+
+    const posts = await postDb.getById(req.params.id)
+        .catch(error => {
+            return res.status(500).json({
+                error: "Server error. Could not get a story.",
+                description: error
+            });
+        });
+
+
+    if (posts.length) {
+
+        if (posts[0]["userId"] !== req.jwt.id) {
+            
+            return res.status(403).json({
+                error: "Access denied. Can't delete a post of another user."
+            });
+        }
+
+        const deletedPost = posts[0];
+
+        // Delete the post
+        await postDb.remove(req.params.id)
+            .catch(error => {
+                return res.status(500).json({
+                    error: "Server error. Could not remove a post.",
+                    description: error
+                });
+            });
+
+        // Get the rest of the posts in that story
+        const allStoryPosts = await postDb.getByStoryId(deletedPost.storyId)
+            .catch(error => {
+                return res.status(500).json({
+                    error: "Server error. Could not get a story.",
+                    description: error
+                });
+            });
+
+        if (allStoryPosts.length) {
+
+            // Set story's coverImage to the image of the latest post
+            const lastPost = allStoryPosts[allStoryPosts.length - 1];
+            storyDb.update(deletedPost.storyId, { coverImage: lastPost.image });
+
+        } else {
+            // That wa the last post! So set coverImage to null
+            storyDb.update(deletedPost.storyId, { coverImage: null });
+        }
+
+        removeImage(deletedPost.image);
+
+        // Respond with the deleted post
+
+        return res.status(200).json(deletedPost);
+
+    } else {
+        return res.status(404).json({
+            error: `Not found. Post with id ${req.params.id} doesn't exist.`
+        });
+    }
+    
 });
 
 

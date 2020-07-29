@@ -105,8 +105,8 @@ router.put("/:id", validateStoryData, async (req, res) => {
         // If the story has been created by another user, can't edit
         if (stories[0]["userId"] !== req.jwt.id) {
 
-            res.status(403).json({
-                error: "Access denied"
+            return res.status(403).json({
+                error: "Access denied. Can't edit a story of another user."
             });
 
         } else {
@@ -142,7 +142,7 @@ router.delete("/:id", (req, res) => {
             if (stories.length) {
                 if (stories[0]["userId"] !== req.jwt.id) {
             
-                    res.status(403).json({
+                    return res.status(403).json({
                         error: "Access denied"
                     });
         

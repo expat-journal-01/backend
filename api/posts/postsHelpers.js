@@ -1,5 +1,8 @@
+const fs = require("fs");
+
 module.exports = {
-    isPostDataValid
+    isPostDataValid,
+    removeImage
 };
 
 function isPostDataValid (data) {
@@ -14,4 +17,13 @@ function isPostDataValid (data) {
     } else {
         return false;
     }
+}
+
+
+function removeImage (imagePath) {
+    fs.unlink(imagePath, (error) => {
+        if (error) {
+            throw error;
+        };
+    });
 }
