@@ -19,7 +19,9 @@ Get a post by its id | GET | /api/posts/:id | 200 OK
 Get all posts by userId | GET | /api/posts/user/:id | 200 OK
 Get all posts by storyId | GET | /api/posts/story/:id | 200 OK
 Add a post | POST | /api/posts | 201 Created | Also automatically updates __coverImage__ of a story it belongs to.
-Get an uploaded image | GET | /uploads/image.jpg | 200 OK
+Edit a post | PUT | /api/posts/:id | 200 OK | Can edit only title and description. Rejects any other data.
+Delete a post | DELETE | /api/posts/:id | 200 OK
+Get an uploaded image | GET | /uploads/image.jpg | 200 OK | For example: https://backendurl/uploads/image.jpg
 
 
 
